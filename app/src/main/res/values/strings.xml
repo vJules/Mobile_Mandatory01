@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">ShoppingList</string>
+    <string name="action_settings">Settings</string>
+
+    <string-array name="gender_values">
+        <item>male</item>
+        <item>female</item>
+    </string-array>
+
+    <string-array name="gender_type">
+        <item>Male</item>
+        <item>Female</item>
+    </string-array>
+</resources>
