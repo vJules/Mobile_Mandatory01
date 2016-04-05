@@ -91,7 +91,9 @@ String TAG = "tag";
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int checkItem = listView.getCheckedItemPosition();
+                final int checkItem = listView.getCheckedItemPosition();
+                final View parent = findViewById(R.id.layout);
+                final String backup = bag.get(checkItem); //get backup
 
                 if (checkItem < 0) {
                     Toast.makeText(MainActivity.this, "No item selected", Toast.LENGTH_LONG).show();
@@ -99,8 +101,26 @@ String TAG = "tag";
                 }
 
                 bag.remove(checkItem);
-                Toast.makeText(MainActivity.this, "Position: " + checkItem, Toast.LENGTH_LONG).show();
+//                Toast.makeText(MainActivity.this, "Position: " + checkItem, Toast.LENGTH_LONG).show();
                 adapter.notifyDataSetChanged();
+                Snackbar snackbar = Snackbar
+                        .make(parent, "Item removed", Snackbar.LENGTH_LONG)
+                        .setAction("UNDO", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                //This code will ONLY be executed in case that
+                                //the user has hit the UNDO button
+                                bag.add(checkItem, backup);
+                                adapter.notifyDataSetChanged();
+                                Snackbar snackbar = Snackbar.make(parent, "Item restored!", Snackbar.LENGTH_SHORT);
+                                //Show the user we have restored the name - but here
+                                //on this snackbar there is NO UNDO - so not SetAction method is called
+                                snackbar.show();
+                            }
+                        });
+
+                snackbar.show();
+
                 listView.setItemChecked(-1, true);
             }
         });
@@ -151,13 +171,11 @@ String TAG = "tag";
         //We read the shared preferences from the
         SharedPreferences prefs = getSharedPreferences("my_prefs", MODE_PRIVATE);
         String email = prefs.getString("email", "");
-        String gender = prefs.getString("gender", "");
-        boolean soundEnabled = prefs.getBoolean("sound", false);
+        String sort = prefs.getString("sort", "");
 
         Toast.makeText(
                 this,
-                "Email: " + email + "\nGender: " + gender + "\nSound Enabled: "
-                        + soundEnabled, Toast.LENGTH_SHORT).show();
+                "Email: " + email + "\nOrder by: " + sort, Toast.LENGTH_SHORT).show();
     }
 
 
