@@ -12,22 +12,22 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
-
+/**
+ * Created by Julian on 07-04-2016.
+ */
+public class ProductActivity extends AppCompatActivity {
     String TAG = "tag";
-    ArrayAdapter<ProductList> productAdapter;
+    ArrayAdapter<Product> productAdapter;
     ListView listView;
-    ArrayList<ProductList> productBag = new ArrayList<ProductList>();
+    ArrayList<Product> productBag = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +48,8 @@ public class MainActivity extends AppCompatActivity {
         listView = (ListView) findViewById(R.id.list);
         //here we create a new adapter linking the bag and the
         //listview
-        productAdapter =  new ProductListAdapter(this, productBag);
+        productAdapter =  new ArrayAdapter<Product>(this,
+                android.R.layout.simple_list_item_checked, productBag);
 
         productAdapter.notifyDataSetChanged();
 
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
 
         listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
-        final  EditText addQnt = (EditText) findViewById(R.id.addQnt);
+        final EditText addQnt = (EditText) findViewById(R.id.addQnt);
         final  EditText addText = (EditText) findViewById(R.id.addText);
         Button addButton = (Button) findViewById(R.id.addButton);
         Button deleteButton = (Button) findViewById(R.id.deleteButton);
@@ -72,12 +73,12 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 if (addText.getText().toString().isEmpty() && addQnt.getText().toString().isEmpty()){
-                    Toast.makeText(MainActivity.this, "Please write something", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ProductActivity.this, "Please write something", Toast.LENGTH_LONG).show();
                     return;
                 }
 
-                ProductList newProductList = new ProductList(addText.getText().toString());
-                productBag.add(newProductList);
+                Product newProduct = new Product(addText.getText().toString(), addQnt.getText().toString());
+                productBag.add(newProduct);
 //                bag.add(addText.getText().toString() + " " + addQnt.getText().toString());
 
                 //The next line is needed in order to say to the ListView
@@ -92,10 +93,10 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 final int checkItem = listView.getCheckedItemPosition();
                 final View parent = findViewById(R.id.layout);
-                final ProductList backup = productBag.get(checkItem); //get backup
+                final Product backup = productBag.get(checkItem); //get backup
 
                 if (checkItem < 0) {
-                    Toast.makeText(MainActivity.this, "No item selected", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ProductActivity.this, "No item selected", Toast.LENGTH_LONG).show();
                     return;
                 }
 
@@ -197,16 +198,16 @@ public class MainActivity extends AppCompatActivity {
 
         if (id == R.id.item_clear) {
             if (productBag.size() == 0){
-                Toast.makeText(MainActivity.this, "No items in list", Toast.LENGTH_LONG).show();
+                Toast.makeText(ProductActivity.this, "No items in list", Toast.LENGTH_LONG).show();
                 return true;
             }
-            new AlertDialog.Builder(MainActivity.this)
+            new AlertDialog.Builder(ProductActivity.this)
                     .setTitle("Delete items")
                     .setMessage("Are you sure you want to delete all items?")
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             productBag.clear();
-                            Toast.makeText(MainActivity.this, "All items removed ", Toast.LENGTH_LONG).show();
+                            Toast.makeText(ProductActivity.this, "All items removed ", Toast.LENGTH_LONG).show();
                             productAdapter.notifyDataSetChanged();
                             listView.setItemChecked(-1, true);
                         }
@@ -225,5 +226,4 @@ public class MainActivity extends AppCompatActivity {
 //        return super.onOptionsItemSelected(item);
         return false;
     }
-
 }
