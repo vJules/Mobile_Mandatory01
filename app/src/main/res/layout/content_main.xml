@@ -31,9 +31,16 @@
         <EditText
             android:id="@+id/addText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:hint="New List"/>
-
+        <EditText
+            android:id="@+id/addQnt"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:hint="Quantity"
+            android:inputType="number"/>
         <Button
             android:id="@+id/addButton"
             android:text="Add"
@@ -63,7 +70,8 @@
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        tools:listitem="@android:layout/simple_list_item_1">
 
     </ListView>
 </LinearLayout>

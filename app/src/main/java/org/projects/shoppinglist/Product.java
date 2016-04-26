@@ -10,9 +10,28 @@ public class Product implements Parcelable {
     String name;
     String quantity;
 
+    public Product(){
+    }
+
     public Product(String startName, String startQuantity){
         name = startName;
         quantity = startQuantity;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(String quantity) {
+        this.quantity = quantity;
     }
 
     public String toString() { return name + " " + quantity;}
