@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
         listView.setAdapter(fireAdapter);
-
+        listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
         final EditText addQnt = (EditText) findViewById(R.id.addQnt);
         final EditText addText = (EditText) findViewById(R.id.addText);
@@ -84,57 +84,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-//        if (savedInstanceState!=null){
-//            productBag = savedInstanceState.getParcelableArrayList("savedFood");
-//        }else {
-//            productBag = new ArrayList<>();
-//        }
-//
-//        //getting our listiew - you can check the ID in the xml to see that it
-//        //is indeed specified as "list"
-//        listView = (ListView) findViewById(R.id.list);
-//        //here we create a new adapter linking the bag and the
-//        //listview
-//        productAdapter =  new ArrayAdapter<Product>(this,
-//                android.R.layout.simple_list_item_checked, productBag);
-//
-//        productAdapter.notifyDataSetChanged();
-//
-//        //setting the adapter on the listview
-////        listView.setAdapter(adapter);
-//        listView.setAdapter(productAdapter);
-//        //here we set the choice mode - meaning in this case we can
-//        //only select one item at a time.
-//
-        listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-//
-//        final EditText addQnt = (EditText) findViewById(R.id.addQnt);
-//        final  EditText addText = (EditText) findViewById(R.id.addText);
-//        Button addButton = (Button) findViewById(R.id.addButton);
-//        Button deleteButton = (Button) findViewById(R.id.deleteButton);
-//
-//
-//
-//        addButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//                if (addText.getText().toString().isEmpty() && addQnt.getText().toString().isEmpty()){
-//                    Toast.makeText(MainActivity.this, "Please write something", Toast.LENGTH_LONG).show();
-//                    return;
-//                }
-//
-//                Product newProduct = new Product(addText.getText().toString(), addQnt.getText().toString());
-//                productBag.add(newProduct);
-////                bag.add(addText.getText().toString() + " " + addQnt.getText().toString());
-//
-//                //The next line is needed in order to say to the ListView
-//                //that the data has changed - we have added stuff now!
-//                Log.d("MyApp", "The listview is updated");
-//                productAdapter.notifyDataSetChanged();
-//            }
-//        });
-//
         if (deleteButton != null) {
             deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -174,6 +123,46 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
+        if (deleteButton != null) {
+            deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final int index = listView.getCheckedItemPosition();
+
+                    if (index < 0) {
+                        Toast.makeText(MainActivity.this, "No item selected", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    final Product backup = fireAdapter.getItem(index); //get backup
+                    fireAdapter.getRef(index).setValue(null);
+                    final View parent = findViewById(R.id.layout);
+
+                    //                Toast.makeText(MainActivity.this, "Position: " + checkItem, Toast.LENGTH_LONG).show();
+                    fireAdapter.notifyDataSetChanged();
+                    Snackbar snackbar = Snackbar
+                            .make(parent, backup + "Item removed", Snackbar.LENGTH_LONG)
+                            .setAction("UNDO", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    //This code will ONLY be executed in case that
+                                    //the user has hit the UNDO button
+                                    ref.push().setValue(backup);
+                                    fireAdapter.notifyDataSetChanged();
+                                    Snackbar snackbar = Snackbar.make(parent, "Item restored!", Snackbar.LENGTH_SHORT);
+                                    //Show the user we have restored the name - but here
+                                    //on this snackbar there is NO UNDO - so not SetAction method is called
+                                    snackbar.show();
+                                }
+                            });
+
+                    snackbar.show();
+
+                    listView.setItemChecked(-1, true);
+                }
+            });
+        }
+
+
         getPreferences();
     }
 
@@ -183,12 +172,7 @@ public class MainActivity extends AppCompatActivity {
 //        outState.putParcelableArrayList("savedFood", productBag);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+
 
     //This will be called when other activities in our application
     //are finished.
@@ -227,6 +211,12 @@ public class MainActivity extends AppCompatActivity {
                 "Email: " + email + "\nOrder by: " + sort, Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -269,6 +259,32 @@ public class MainActivity extends AppCompatActivity {
                     .show();
 
             return true;
+        }
+
+        if (id == R.id.item_share) {
+            if (fireAdapter.getCount() == 0) {
+                Toast.makeText(MainActivity.this, "No items in list", Toast.LENGTH_LONG).show();
+                return true;
+            }
+            String textToShare = "";
+            for (int i = 0; i<fireAdapter.getCount();i++)
+            {
+                Product p = (Product) fireAdapter.getItem(i);
+                String productString = "";
+                if(i+1 == fireAdapter.getCount()){
+                    productString =  p.toString();
+                }
+                else{
+                    productString =  p.toString() + "\n";
+                }
+
+                textToShare = textToShare + productString;
+            }
+
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_TEXT, textToShare);
+                startActivity(intent);
         }
 
 //        return super.onOptionsItemSelected(item);
