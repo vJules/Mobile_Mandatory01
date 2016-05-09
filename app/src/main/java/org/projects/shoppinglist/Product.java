@@ -3,6 +3,9 @@ package org.projects.shoppinglist;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Calendar;
+import java.util.Date;
+
 /**
  * Created by Julian on 05-04-2016.
  */
@@ -17,6 +20,8 @@ public class Product implements Parcelable {
         name = startName;
         quantity = startQuantity;
     }
+
+
 
     public String getName() {
         return name;
