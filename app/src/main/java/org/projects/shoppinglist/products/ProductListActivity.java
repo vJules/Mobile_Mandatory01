@@ -1,12 +1,13 @@
-package org.projects.shoppinglist;
+package org.projects.shoppinglist.products;
 
+import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -16,72 +17,113 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.firebase.ui.FirebaseListAdapter;
 
+import org.projects.shoppinglist.R;
 import org.projects.shoppinglist.model.ShoppingList;
-import org.projects.shoppinglist.products.ProductListActivity;
 import org.projects.shoppinglist.settings.SettingsActivity;
+import org.projects.shoppinglist.model.Product;
 import org.projects.shoppinglist.utils.IntentStarter;
 
-
-public class MainActivity extends AppCompatActivity {
+/**
+ * Created by Julian on 09-05-2016.
+ */
+public class ProductListActivity extends AppCompatActivity {
     String TAG = "tag";
     ListView listView;
-    FirebaseListAdapter<ShoppingList> fireAdapter;
+    FirebaseListAdapter<Product> fireAdapter;
     Firebase ref;
 
-    IntentStarter intentStarter;
+    public static final String KEY_PRODUCT_ID = "org.projects.shoppinglist.products.ProductListActivity.KEY_PRODUCT_ID";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_productlist);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        intentStarter = new IntentStarter();
+
+
+        toolbar.setNavigationIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.abc_ic_ab_back_mtrl_am_alpha, null));
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                finish();
+            }
+        });
 
         listView = (ListView) findViewById(R.id.list);
 
-        ref = new Firebase("https://eaashoppinglist.firebaseio.com/shoppingLists");
+        final String key = getIntent().getStringExtra(KEY_PRODUCT_ID );
 
-        fireAdapter = new FirebaseListAdapter<ShoppingList>(this, ShoppingList.class, android.R.layout.simple_list_item_1, ref) {
+        Firebase shoppingRef = new Firebase("https://eaashoppinglist.firebaseio.com/shoppingLists").child(key);
+        shoppingRef.addValueEventListener(new ValueEventListener() {
             @Override
-            protected void populateView(View view, ShoppingList shoppingList, int i) {
-                TextView text = (TextView) view.findViewById(android.R.id.text1);
-                text.setText(shoppingList.getName());
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String name = (String) dataSnapshot.child("name").getValue();
+                toolbar.setTitle(name);
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) { }
+        });
+
+        ref = shoppingRef.child("products");
+
+        fireAdapter = new FirebaseListAdapter<Product>(this, Product.class, android.R.layout.simple_list_item_2, ref) {
+            @Override
+            protected void populateView(View view, Product product, int i) {
+                TextView text1 = (TextView) view.findViewById(android.R.id.text1);
+                text1.setText(product.getName());
+
+                TextView text2 = (TextView) view.findViewById(android.R.id.text2);
+                text2.setText(product.getQuantity());
             }
         };
 
         listView.setAdapter(fireAdapter);
-//        listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
+        final EditText addQnt = (EditText) findViewById(R.id.addQnt);
+        final EditText addText = (EditText) findViewById(R.id.addText);
+        Button addButton = (Button) findViewById(R.id.addButton);
+        Button deleteButton = (Button) findViewById(R.id.deleteButton);
 
-//        final  EditText addQnt = (EditText) findViewById(R.id.addQnt);
-        final  EditText addText = (EditText) findViewById(R.id.addText);
-//        Button addButton = (Button) findViewById(R.id.addButton);
         FloatingActionButton fabadd = (FloatingActionButton) findViewById(R.id.fab_add);
-//        Button deleteButton = (Button) findViewById(R.id.deleteButton);
+        final EditText addInputText = new EditText(this);
+        final EditText addInputQnt = new EditText(this);
+        final LinearLayout layout = new LinearLayout(this);
 
-        final EditText addInput = new EditText(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
 
-        AlertDialog.Builder addAlertDialogBuild = new AlertDialog.Builder(MainActivity.this)
-                .setTitle("New List")
-                .setMessage("Add a new list!")
-                .setView(addInput)
+        addInputText.setHint("Name");
+        layout.addView(addInputText);
+
+        addInputQnt.setHint("Quantity");
+        layout.addView(addInputQnt);
+
+        android.support.v7.app.AlertDialog.Builder addAlertDialogBuild = new android.support.v7.app.AlertDialog.Builder(ProductListActivity.this)
+                .setTitle("New Product")
+                .setMessage("Add a new product!")
+                .setView(layout)
                 .setPositiveButton("Add", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        if (TextUtils.isEmpty(addInput.getText().toString())) {
-                            Toast.makeText(MainActivity.this, "Please write something", Toast.LENGTH_LONG).show();
+                        if (TextUtils.isEmpty(addInputText.getText().toString()) || TextUtils.isEmpty(addInputQnt.getText().toString())) {
+                            Toast.makeText(ProductListActivity.this, "Please write something", Toast.LENGTH_LONG).show();
                             return;
                         }
 
-                        ShoppingList pl = new ShoppingList(addInput.getText().toString());
+                        Product pl = new Product(addInputText.getText().toString(), addInputQnt.getText().toString());
                         ref.push().setValue(pl);
                         fireAdapter.notifyDataSetChanged();
                     }
@@ -92,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 })
                 .setIcon(android.R.drawable.edit_text);
-        final AlertDialog addAlertDialog = addAlertDialogBuild.create();
+        final android.support.v7.app.AlertDialog addAlertDialog = addAlertDialogBuild.create();
 
 
 
@@ -106,25 +148,26 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-//        if (fabadd != null) {
-//            fabadd.setOnClickListener(new View.OnClickListener() {
+//        if (addButton != null) {
+//            addButton.setOnClickListener(new View.OnClickListener() {
 //                @Override
 //                public void onClick(View v) {
 //
-//                    if (TextUtils.isEmpty(addText.getText().toString())) {
-//                        Toast.makeText(MainActivity.this, "Please write something", Toast.LENGTH_LONG).show();
+//                    if (TextUtils.isEmpty(addText.getText().toString()) && TextUtils.isEmpty(addQnt.getText().toString())) {
+//                        Toast.makeText(ProductListActivity.this, "Please write something", Toast.LENGTH_LONG).show();
 //                        return;
 //                    }
 //
-//                    ShoppingList pl = new ShoppingList(addText.getText().toString());
-//                    ref.push().setValue(pl);
+//                    Product p = new Product(addText.getText().toString(), addQnt.getText().toString());
+//                    ref.push().setValue(p);
+//                    ref.getParent();
 //                    fireAdapter.notifyDataSetChanged();
 //
 //                }
 //            });
 //        }
-
-
+//
+//
 //        if (deleteButton != null) {
 //            deleteButton.setOnClickListener(new View.OnClickListener() {
 //                @Override
@@ -132,10 +175,10 @@ public class MainActivity extends AppCompatActivity {
 //                    final int index = listView.getCheckedItemPosition();
 //
 //                    if (index < 0) {
-//                        Toast.makeText(MainActivity.this, "No item selected", Toast.LENGTH_LONG).show();
+//                        Toast.makeText(ProductListActivity.this, "No item selected", Toast.LENGTH_LONG).show();
 //                        return;
 //                    }
-//                    final ShoppingList backup = fireAdapter.getItem(index); //get backup
+//                    final Product backup = fireAdapter.getItem(index); //get backup
 //                    fireAdapter.getRef(index).setValue(null);
 //                    final View parent = findViewById(R.id.layout);
 //
@@ -164,19 +207,6 @@ public class MainActivity extends AppCompatActivity {
 //            });
 //        }
 
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                intentStarter.showShoppingList(MainActivity.this, fireAdapter.getRef(position).getKey());
-            }
-        });
-
-
-
-
-
-
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 
             @Override
@@ -187,13 +217,14 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
+
         getPreferences();
     }
 
     public void optionsShow(final int position) {
         final CharSequence colors[] = new CharSequence[] {"Edit", "Delete"};
 
-        final AlertDialog.Builder optionsBuilder = new AlertDialog.Builder(MainActivity.this);
+        final android.support.v7.app.AlertDialog.Builder optionsBuilder = new android.support.v7.app.AlertDialog.Builder(ProductListActivity.this);
 
 
         optionsBuilder.setTitle("Product actions");
@@ -202,13 +233,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
                     case 0:
-                        Toast.makeText(MainActivity.this, "EDITIONG " + position, Toast.LENGTH_LONG).show();
+                        Toast.makeText(ProductListActivity.this, "EDITIONG " + position, Toast.LENGTH_LONG).show();
 
                         break;
 
                     case 1:
                         // Your code when 2nd option seletced
-                        Toast.makeText(MainActivity.this, "DELETING " + position, Toast.LENGTH_LONG).show();
+                        Toast.makeText(ProductListActivity.this, "DELETING " + position, Toast.LENGTH_LONG).show();
                         deleteItem(position);
                         break;
 
@@ -219,8 +250,8 @@ public class MainActivity extends AppCompatActivity {
         optionsBuilder.show();
     }
 
-    public void deleteItem(int position){
-        final ShoppingList backup = fireAdapter.getItem(position); //get backup
+    public void deleteItem(int position) {
+        final Product backup = fireAdapter.getItem(position); //get backup
         fireAdapter.getRef(position).setValue(null);
         final View parent = findViewById(R.id.layout);
 
@@ -253,23 +284,18 @@ public class MainActivity extends AppCompatActivity {
 //        outState.putParcelableArrayList("savedFood", productBag);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+
 
     //This will be called when other activities in our application
     //are finished.
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode==1) //exited our preference screen
+        if (requestCode == 1) //exited our preference screen
         {
-            Toast toast =
-                    Toast.makeText(getApplicationContext(), "back from preferences", Toast.LENGTH_LONG);
-            toast.setText("back from our preferences");
-            toast.show();
+//            Toast toast =
+//                    Toast.makeText(getApplicationContext(), "back from preferences", Toast.LENGTH_LONG);
+//            toast.setText("back from our preferences");
+//            toast.show();
             //here you could put code to do something.......
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -279,7 +305,6 @@ public class MainActivity extends AppCompatActivity {
         //Here we create a new activity and we instruct the
         //Android system to start it
         Intent intent = new Intent(this, SettingsActivity.class);
-
         //startActivity(intent); //this we can use if we DONT CARE ABOUT RESULT
 
         //we can use this, if we need to know when the user exists our preference screens
@@ -298,6 +323,12 @@ public class MainActivity extends AppCompatActivity {
                 "Email: " + email + "\nOrder by: " + sort, Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.sub_menu, menu);
+        return true;
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -315,35 +346,60 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
 
 
-
-//        if (id == R.id.item_clear) {
-//            if (productBag.size() == 0){
-//                Toast.makeText(MainActivity.this, "No items in list", Toast.LENGTH_LONG).show();
-//                return true;
-//            }
-//            new AlertDialog.Builder(MainActivity.this)
-//                    .setTitle("Delete items")
-//                    .setMessage("Are you sure you want to delete all items?")
-//                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            productBag.clear();
-//                            Toast.makeText(MainActivity.this, "All items removed ", Toast.LENGTH_LONG).show();
-//                            productAdapter.notifyDataSetChanged();
-//                            listView.setItemChecked(-1, true);
-//                        }
-//                    })
-//                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            // do nothing
-//                        }
-//                    })
-//                    .setIcon(android.R.drawable.ic_dialog_alert)
-//                    .show();
+        if (id == R.id.item_clear) {
+            if (fireAdapter.getCount() == 0) {
+                Toast.makeText(ProductListActivity.this, "No items in list", Toast.LENGTH_LONG).show();
+                return true;
+            }
+            new AlertDialog.Builder(ProductListActivity.this)
+                    .setTitle("Delete items")
+                    .setMessage("Are you sure you want to delete all items?")
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            ref.removeValue(null);
+                            Toast.makeText(ProductListActivity.this, "All items removed ", Toast.LENGTH_LONG).show();
+                            fireAdapter.notifyDataSetChanged();
+                            listView.setItemChecked(-1, true);
+                        }
+                    })
+                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // do nothing
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
 
             return true;
         }
 
+        if (id == R.id.item_share) {
+            if (fireAdapter.getCount() == 0) {
+                Toast.makeText(ProductListActivity.this, "No items in list", Toast.LENGTH_LONG).show();
+                return true;
+            }
+            String textToShare = "";
+            for (int i = 0; i<fireAdapter.getCount();i++)
+            {
+                Product p = (Product) fireAdapter.getItem(i);
+                String productString = "";
+                if(i+1 == fireAdapter.getCount()){
+                    productString =  p.toString();
+                }
+                else{
+                    productString =  p.toString() + "\n";
+                }
+
+                textToShare = textToShare + productString;
+            }
+
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, textToShare);
+            startActivity(intent);
+        }
+
 //        return super.onOptionsItemSelected(item);
+        return false;
     }
-
-
+}

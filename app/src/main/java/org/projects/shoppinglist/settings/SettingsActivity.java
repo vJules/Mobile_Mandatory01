@@ -1,4 +1,4 @@
-package org.projects.shoppinglist;
+package org.projects.shoppinglist.settings;
 
 /**
  * Created by Julian on 04-04-2016.
@@ -6,6 +6,8 @@ package org.projects.shoppinglist;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+
+import org.projects.shoppinglist.R;
 
 public class SettingsActivity extends PreferenceActivity {
 

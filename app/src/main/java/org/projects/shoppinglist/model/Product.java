@@ -1,10 +1,7 @@
-package org.projects.shoppinglist;
+package org.projects.shoppinglist.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.util.Calendar;
-import java.util.Date;
 
 /**
  * Created by Julian on 05-04-2016.
