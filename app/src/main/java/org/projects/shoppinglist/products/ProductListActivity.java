@@ -170,66 +170,6 @@ public class ProductListActivity extends AppCompatActivity {
             });
         }
 
-
-//        if (addButton != null) {
-//            addButton.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//
-//                    if (TextUtils.isEmpty(addText.getText().toString()) && TextUtils.isEmpty(addQnt.getText().toString())) {
-//                        Toast.makeText(ProductListActivity.this, "Please write something", Toast.LENGTH_LONG).show();
-//                        return;
-//                    }
-//
-//                    Product p = new Product(addText.getText().toString(), addQnt.getText().toString());
-//                    ref.push().setValue(p);
-//                    ref.getParent();
-//                    fireAdapter.notifyDataSetChanged();
-//
-//                }
-//            });
-//        }
-//
-//
-//        if (deleteButton != null) {
-//            deleteButton.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    final int index = listView.getCheckedItemPosition();
-//
-//                    if (index < 0) {
-//                        Toast.makeText(ProductListActivity.this, "No item selected", Toast.LENGTH_LONG).show();
-//                        return;
-//                    }
-//                    final Product backup = fireAdapter.getItem(index); //get backup
-//                    fireAdapter.getRef(index).setValue(null);
-//                    final View parent = findViewById(R.id.layout);
-//
-//                    //                Toast.makeText(MainActivity.this, "Position: " + checkItem, Toast.LENGTH_LONG).show();
-//                    fireAdapter.notifyDataSetChanged();
-//                    Snackbar snackbar = Snackbar
-//                            .make(parent, backup + "Item removed", Snackbar.LENGTH_LONG)
-//                            .setAction("UNDO", new View.OnClickListener() {
-//                                @Override
-//                                public void onClick(View view) {
-//                                    //This code will ONLY be executed in case that
-//                                    //the user has hit the UNDO button
-//                                    ref.push().setValue(backup);
-//                                    fireAdapter.notifyDataSetChanged();
-//                                    Snackbar snackbar = Snackbar.make(parent, "Item restored!", Snackbar.LENGTH_SHORT);
-//                                    //Show the user we have restored the name - but here
-//                                    //on this snackbar there is NO UNDO - so not SetAction method is called
-//                                    snackbar.show();
-//                                }
-//                            });
-//
-//                    snackbar.show();
-//
-//                    listView.setItemChecked(-1, true);
-//                }
-//            });
-//        }
-
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
@@ -308,11 +248,6 @@ public class ProductListActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1) //exited our preference screen
         {
-//            Toast toast =
-//                    Toast.makeText(getApplicationContext(), "back from preferences", Toast.LENGTH_LONG);
-//            toast.setText("back from our preferences");
-//            toast.show();
-            //here you could put code to do something.......
         }
         super.onActivityResult(requestCode, resultCode, data);
     }

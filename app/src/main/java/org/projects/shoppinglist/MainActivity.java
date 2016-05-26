@@ -101,66 +101,6 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-
-//        if (fabadd != null) {
-//            fabadd.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//
-//                    if (TextUtils.isEmpty(addText.getText().toString())) {
-//                        Toast.makeText(MainActivity.this, "Please write something", Toast.LENGTH_LONG).show();
-//                        return;
-//                    }
-//
-//                    ShoppingList pl = new ShoppingList(addText.getText().toString());
-//                    ref.push().setValue(pl);
-//                    fireAdapter.notifyDataSetChanged();
-//
-//                }
-//            });
-//        }
-
-
-//        if (deleteButton != null) {
-//            deleteButton.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    final int index = listView.getCheckedItemPosition();
-//
-//                    if (index < 0) {
-//                        Toast.makeText(MainActivity.this, "No item selected", Toast.LENGTH_LONG).show();
-//                        return;
-//                    }
-//                    final ShoppingList backup = fireAdapter.getItem(index); //get backup
-//                    fireAdapter.getRef(index).setValue(null);
-//                    final View parent = findViewById(R.id.layout);
-//
-//                    //                Toast.makeText(MainActivity.this, "Position: " + checkItem, Toast.LENGTH_LONG).show();
-//                    fireAdapter.notifyDataSetChanged();
-//                    Snackbar snackbar = Snackbar
-//                            .make(parent, backup + "Item removed", Snackbar.LENGTH_LONG)
-//                            .setAction("UNDO", new View.OnClickListener() {
-//                                @Override
-//                                public void onClick(View view) {
-//                                    //This code will ONLY be executed in case that
-//                                    //the user has hit the UNDO button
-//                                    ref.push().setValue(backup);
-//                                    fireAdapter.notifyDataSetChanged();
-//                                    Snackbar snackbar = Snackbar.make(parent, "Item restored!", Snackbar.LENGTH_SHORT);
-//                                    //Show the user we have restored the name - but here
-//                                    //on this snackbar there is NO UNDO - so not SetAction method is called
-//                                    snackbar.show();
-//                                }
-//                            });
-//
-//                    snackbar.show();
-//
-//                    listView.setItemChecked(-1, true);
-//                }
-//            });
-//        }
-
-
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -305,34 +245,6 @@ public class MainActivity extends AppCompatActivity {
             setPreferences();
             return true;
         }
-
-        //noinspection SimplifiableIfStatement
-
-
-
-//        if (id == R.id.item_clear) {
-//            if (productBag.size() == 0){
-//                Toast.makeText(MainActivity.this, "No items in list", Toast.LENGTH_LONG).show();
-//                return true;
-//            }
-//            new AlertDialog.Builder(MainActivity.this)
-//                    .setTitle("Delete items")
-//                    .setMessage("Are you sure you want to delete all items?")
-//                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            productBag.clear();
-//                            Toast.makeText(MainActivity.this, "All items removed ", Toast.LENGTH_LONG).show();
-//                            productAdapter.notifyDataSetChanged();
-//                            listView.setItemChecked(-1, true);
-//                        }
-//                    })
-//                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            // do nothing
-//                        }
-//                    })
-//                    .setIcon(android.R.drawable.ic_dialog_alert)
-//                    .show();
 
             return true;
         }

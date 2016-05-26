@@ -24,42 +24,6 @@
         android:layout_gravity="center"
         android:textAlignment="center" />
 
-
-
-        <!--<EditText-->
-            <!--android:id="@+id/addText"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_below="@id/welcome_text"-->
-            <!--android:hint="New List"/>-->
-        <!--<EditText-->
-            <!--android:id="@+id/addQnt"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="0dp"-->
-            <!--android:layout_weight="1"-->
-            <!--android:hint="Quantity"-->
-            <!--android:inputType="number"/>-->
-        <!--<Button-->
-            <!--android:id="@+id/addButton"-->
-            <!--android:layout_below="@+id/addText"-->
-            <!--android:text="Add"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"/>-->
-
-            <!--<Button-->
-                <!--android:id="@+id/editButton"-->
-                <!--android:text="Edit"-->
-                <!--android:layout_weight="1"-->
-                <!--android:layout_width="0dp"-->
-                <!--android:layout_height="wrap_content"/>-->
-            <!--<Button-->
-                <!--android:id="@+id/deleteButton"-->
-                <!--android:text="Delete"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_below="@+id/welcome_text"-->
-                <!--android:layout_height="wrap_content"/>-->
-
-
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"
