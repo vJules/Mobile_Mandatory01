@@ -22,8 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:textAlignment="center"
-        android:text="Welcome to my shopping list" />
+        android:textAlignment="center" />
 
 
 
@@ -66,7 +65,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/welcome_text"
-        tools:listitem="@android:layout/simple_list_item_1">
+
+        tools:listitem="@android:layout/simple_list_item_1"
+
+        >
 
     </ListView>
 

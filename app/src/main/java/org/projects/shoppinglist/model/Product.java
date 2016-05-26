@@ -18,8 +18,6 @@ public class Product implements Parcelable {
         quantity = startQuantity;
     }
 
-
-
     public String getName() {
         return name;
     }

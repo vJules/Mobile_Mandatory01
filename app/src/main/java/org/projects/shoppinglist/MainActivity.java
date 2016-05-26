@@ -48,8 +48,10 @@ public class MainActivity extends AppCompatActivity {
 
         listView = (ListView) findViewById(R.id.list);
 
+        //Create new reference to firebase
         ref = new Firebase("https://eaashoppinglist.firebaseio.com/shoppingLists");
 
+        //Create an adapter where used class and layout is specified
         fireAdapter = new FirebaseListAdapter<ShoppingList>(this, ShoppingList.class, android.R.layout.simple_list_item_1, ref) {
             @Override
             protected void populateView(View view, ShoppingList shoppingList, int i) {
@@ -59,14 +61,8 @@ public class MainActivity extends AppCompatActivity {
         };
 
         listView.setAdapter(fireAdapter);
-//        listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
-
-//        final  EditText addQnt = (EditText) findViewById(R.id.addQnt);
-        final  EditText addText = (EditText) findViewById(R.id.addText);
-//        Button addButton = (Button) findViewById(R.id.addButton);
         FloatingActionButton fabadd = (FloatingActionButton) findViewById(R.id.fab_add);
-//        Button deleteButton = (Button) findViewById(R.id.deleteButton);
 
         final EditText addInput = new EditText(this);
 
@@ -84,16 +80,16 @@ public class MainActivity extends AppCompatActivity {
                         ShoppingList pl = new ShoppingList(addInput.getText().toString());
                         ref.push().setValue(pl);
                         fireAdapter.notifyDataSetChanged();
+                        addInput.setText("");
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        // do nothing
+                        addInput.setText("");
                     }
                 })
                 .setIcon(android.R.drawable.edit_text);
         final AlertDialog addAlertDialog = addAlertDialogBuild.create();
-
 
 
         if (fabadd != null) {
@@ -202,13 +198,12 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
                     case 0:
-                        Toast.makeText(MainActivity.this, "EDITIONG " + position, Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, "Editing not functional", Toast.LENGTH_LONG).show();
 
                         break;
 
                     case 1:
                         // Your code when 2nd option seletced
-                        Toast.makeText(MainActivity.this, "DELETING " + position, Toast.LENGTH_LONG).show();
                         deleteItem(position);
                         break;
 
@@ -267,8 +262,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode==1) //exited our preference screen
         {
             Toast toast =
-                    Toast.makeText(getApplicationContext(), "back from preferences", Toast.LENGTH_LONG);
-            toast.setText("back from our preferences");
+                    Toast.makeText(getApplicationContext(), "Settings saved", Toast.LENGTH_LONG);
             toast.show();
             //here you could put code to do something.......
         }
@@ -288,14 +282,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void getPreferences() {
 
+        TextView welcomeView = (TextView) findViewById(R.id.welcome_text);
+
         //We read the shared preferences from the
         SharedPreferences prefs = getSharedPreferences("my_prefs", MODE_PRIVATE);
         String email = prefs.getString("email", "");
-        String sort = prefs.getString("sort", "");
 
-        Toast.makeText(
-                this,
-                "Email: " + email + "\nOrder by: " + sort, Toast.LENGTH_SHORT).show();
+        welcomeView.setText("Logged in as " + email);
+
     }
 
 

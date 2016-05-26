@@ -13,7 +13,6 @@ public class MyApplication extends Application {
         super.onCreate();
         Firebase.setAndroidContext(this);
         Firebase.getDefaultConfig().setPersistenceEnabled(true);
-
     }
 }
 

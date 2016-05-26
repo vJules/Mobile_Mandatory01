@@ -17,9 +17,4 @@ public class IntentStarter {
         activity.startActivity(intent);
     }
 
-    public void showProductList(Activity activity, String key){
-        Intent intent = new Intent(activity, ProductListActivity.class);
-        intent.putExtra(ProductListActivity.KEY_PRODUCT_ID, key);
-        activity.startActivity(intent);
-    }
 }

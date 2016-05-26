@@ -10,6 +10,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,6 +34,8 @@ import org.projects.shoppinglist.model.ShoppingList;
 import org.projects.shoppinglist.settings.SettingsActivity;
 import org.projects.shoppinglist.model.Product;
 import org.projects.shoppinglist.utils.IntentStarter;
+
+import java.util.Date;
 
 /**
  * Created by Julian on 09-05-2016.
@@ -80,6 +83,8 @@ public class ProductListActivity extends AppCompatActivity {
 
         ref = shoppingRef.child("products");
 
+
+
         fireAdapter = new FirebaseListAdapter<Product>(this, Product.class, android.R.layout.simple_list_item_2, ref) {
             @Override
             protected void populateView(View view, Product product, int i) {
@@ -94,43 +99,60 @@ public class ProductListActivity extends AppCompatActivity {
         listView.setAdapter(fireAdapter);
         listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
-        final EditText addQnt = (EditText) findViewById(R.id.addQnt);
-        final EditText addText = (EditText) findViewById(R.id.addText);
-        Button addButton = (Button) findViewById(R.id.addButton);
-        Button deleteButton = (Button) findViewById(R.id.deleteButton);
 
+
+
+        //Get the FAB
         FloatingActionButton fabadd = (FloatingActionButton) findViewById(R.id.fab_add);
-        final EditText addInputText = new EditText(this);
-        final EditText addInputQnt = new EditText(this);
-        final LinearLayout layout = new LinearLayout(this);
 
+        //Initialize a layout
+        final LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
 
+        //Initialize EditTexts
+        final EditText addInputText = new EditText(this);
+        final EditText addInputQnt = new EditText(this);
+
+        //Set input type so number show on keyboard
+        addInputQnt.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+        //Set hints for EditTexts and add them to the layout
         addInputText.setHint("Name");
         layout.addView(addInputText);
 
         addInputQnt.setHint("Quantity");
         layout.addView(addInputQnt);
 
+        //Initialize AlertBulder
         android.support.v7.app.AlertDialog.Builder addAlertDialogBuild = new android.support.v7.app.AlertDialog.Builder(ProductListActivity.this)
                 .setTitle("New Product")
                 .setMessage("Add a new product!")
+
+                //Set the view to use the previous defined layout
                 .setView(layout)
                 .setPositiveButton("Add", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
+
+                        //Make sure the input is not empty
                         if (TextUtils.isEmpty(addInputText.getText().toString()) || TextUtils.isEmpty(addInputQnt.getText().toString())) {
                             Toast.makeText(ProductListActivity.this, "Please write something", Toast.LENGTH_LONG).show();
                             return;
                         }
 
+                        //Initialize a new product and push it to firebase
                         Product pl = new Product(addInputText.getText().toString(), addInputQnt.getText().toString());
                         ref.push().setValue(pl);
                         fireAdapter.notifyDataSetChanged();
+
+                        //Remove the text for next time a item is being added
+                        addInputQnt.setText("");
+                        addInputText.setText("");
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        // do nothing
+                        addInputQnt.setText("");
+                        addInputText.setText("");
                     }
                 })
                 .setIcon(android.R.drawable.edit_text);
@@ -138,6 +160,7 @@ public class ProductListActivity extends AppCompatActivity {
 
 
 
+        //Show AlertDialog when FAB is Clicked
         if (fabadd != null) {
             fabadd.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -208,42 +231,38 @@ public class ProductListActivity extends AppCompatActivity {
 //        }
 
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
                 optionsShow(position);
                 return true;
             }
-
         });
-
 
         getPreferences();
     }
 
     public void optionsShow(final int position) {
-        final CharSequence colors[] = new CharSequence[] {"Edit", "Delete"};
+        //CharSequence which holds the options
+        final CharSequence options[] = new CharSequence[] {"Edit", "Delete"};
 
+        //AlertBuilder for item options
         final android.support.v7.app.AlertDialog.Builder optionsBuilder = new android.support.v7.app.AlertDialog.Builder(ProductListActivity.this);
-
-
         optionsBuilder.setTitle("Product actions");
-        optionsBuilder.setItems(colors, new DialogInterface.OnClickListener() {
+
+        //Set the items in the AlertDialog to be the items in CharSequence
+        optionsBuilder.setItems(options, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                //Switch which holds the options
                 switch (which) {
                     case 0:
-                        Toast.makeText(ProductListActivity.this, "EDITIONG " + position, Toast.LENGTH_LONG).show();
-
+                        //Code for edit
                         break;
 
                     case 1:
-                        // Your code when 2nd option seletced
-                        Toast.makeText(ProductListActivity.this, "DELETING " + position, Toast.LENGTH_LONG).show();
+                        //Code for delete button calls delete method
                         deleteItem(position);
                         break;
-
-
                 }
             }
         });
@@ -251,31 +270,28 @@ public class ProductListActivity extends AppCompatActivity {
     }
 
     public void deleteItem(int position) {
-        final Product backup = fireAdapter.getItem(position); //get backup
+        //Save the deleted product, if user wants to restore
+        final Product backup = fireAdapter.getItem(position);
+        //Delete the product on firebase
         fireAdapter.getRef(position).setValue(null);
-        final View parent = findViewById(R.id.layout);
 
-        //                Toast.makeText(MainActivity.this, "Position: " + checkItem, Toast.LENGTH_LONG).show();
+        final View parent = findViewById(R.id.layout);
         fireAdapter.notifyDataSetChanged();
+
+        //Make SnackBar, with an Undo Action
         Snackbar snackbar = Snackbar
                 .make(parent, backup + "Item removed", Snackbar.LENGTH_LONG)
                 .setAction("UNDO", new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        //This code will ONLY be executed in case that
-                        //the user has hit the UNDO button
+                        //Send the backup product to firebase if user hits undo, and show restored SnackBar
                         ref.push().setValue(backup);
                         fireAdapter.notifyDataSetChanged();
                         Snackbar snackbar = Snackbar.make(parent, "Item restored!", Snackbar.LENGTH_SHORT);
-                        //Show the user we have restored the name - but here
-                        //on this snackbar there is NO UNDO - so not SetAction method is called
                         snackbar.show();
                     }
                 });
-
         snackbar.show();
-
-        listView.setItemChecked(-1, true);
     }
 
     @Override
@@ -315,12 +331,6 @@ public class ProductListActivity extends AppCompatActivity {
 
         //We read the shared preferences from the
         SharedPreferences prefs = getSharedPreferences("my_prefs", MODE_PRIVATE);
-        String email = prefs.getString("email", "");
-        String sort = prefs.getString("sort", "");
-
-        Toast.makeText(
-                this,
-                "Email: " + email + "\nOrder by: " + sort, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -337,31 +347,33 @@ public class ProductListActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+
         if (id == R.id.action_settings) {
             setPreferences();
             return true;
         }
 
-        //noinspection SimplifiableIfStatement
-
-
+        //Run if item_clear is the item clicked
         if (id == R.id.item_clear) {
+            //Check if there are any items in the list. If there isn't show a snackbar and dont continue with rest of code.
             if (fireAdapter.getCount() == 0) {
                 Toast.makeText(ProductListActivity.this, "No items in list", Toast.LENGTH_LONG).show();
                 return true;
             }
+            //If there are items, make a AlertDialog
             new AlertDialog.Builder(ProductListActivity.this)
                     .setTitle("Delete items")
                     .setMessage("Are you sure you want to delete all items?")
+                    //If yes pressed
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            ref.removeValue(null);
+                            //Remove all by setting value to null and show snackbar
+                            ref.removeValue();
                             Toast.makeText(ProductListActivity.this, "All items removed ", Toast.LENGTH_LONG).show();
                             fireAdapter.notifyDataSetChanged();
-                            listView.setItemChecked(-1, true);
                         }
                     })
+                    //If no pressed
                     .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             // do nothing
@@ -374,13 +386,19 @@ public class ProductListActivity extends AppCompatActivity {
         }
 
         if (id == R.id.item_share) {
+            //Check if there are any items in the list. If there isn't show a snackbar and dont continue with rest of code.
             if (fireAdapter.getCount() == 0) {
                 Toast.makeText(ProductListActivity.this, "No items in list", Toast.LENGTH_LONG).show();
                 return true;
             }
+
+            //Nake string where items are added
             String textToShare = "";
+
+            //Loop through all items
             for (int i = 0; i<fireAdapter.getCount();i++)
             {
+                //Get item and make name and quantity one string
                 Product p = (Product) fireAdapter.getItem(i);
                 String productString = "";
                 if(i+1 == fireAdapter.getCount()){
@@ -390,9 +408,11 @@ public class ProductListActivity extends AppCompatActivity {
                     productString =  p.toString() + "\n";
                 }
 
+                //Add the product string to the entire list of products
                 textToShare = textToShare + productString;
             }
 
+            //A new Intent, which opens options for which app to send with. Add the string using putExtra.
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("text/plain");
             intent.putExtra(Intent.EXTRA_TEXT, textToShare);
